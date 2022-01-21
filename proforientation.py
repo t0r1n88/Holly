@@ -53,21 +53,24 @@ for row in df.itertuples():
     if str(row[2]) == 'nan':
         continue
     for i in range(7,length,2):
-
         data_dct[row[1]][row[2]] += check_digit(row[i])
 
 print(data_dct)
 
-# Подсчитываем общую сумму
+# Подсчитываем  сумму для каждого ПОО и общую сумму
+
+total = 0
 
 for poo,places in data_dct.items():
-    total = 0
+    total_poo = 0
     for place,value in places.items():
-        total += value
-    data_dct[poo][f'Итого {poo}'] = total
+        total_poo += value
+    data_dct[poo][f'Итого {poo}'] = total_poo
+    print(total_poo)
+    total += total_poo
 
 print(data_dct)
-
+print(total)
 # Обрабатываем словарь для перевода в читаемую таблицу
 first_step_df = pd.DataFrame.from_dict(data_dct,orient='index')
 first_step_df.to_excel('temp.xlsx')
@@ -77,7 +80,10 @@ stack_df = first_step_df.stack()
 out_df = stack_df.to_frame().reset_index()
 # Переименовываем колонки
 out_df.rename(columns={'level_0':'Наименование ПОО','level_1':'Место проведения',0:'Количество школьников посетивших профробы'},inplace=True)
-
+# Добавляем результирующую строку
+itog_row = {'Наименование ПОО':'Итого по Республике Бурятия','Место проведения':'','Количество школьников посетивших профробы':total}
+out_df = out_df.append(itog_row,ignore_index=True)
+print(out_df)
 out_df.to_excel('Базовый отчет по профориентации.xlsx',index=False)
 #
 # # df.to_excel('temp.xlsx',index=False)
